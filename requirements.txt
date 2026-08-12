@@ -1,0 +1,17 @@
+fastapi>=0.115
+uvicorn[standard]>=0.34
+pydantic>=2.10
+pydantic-settings>=2.7
+python-dotenv>=1.0
+
+# LangChain — core Runnable/prompt/output-parser abstractions plus the
+# Anthropic chat model integration. `anthropic` itself comes along as a
+# transitive dependency of langchain-anthropic.
+langchain-core>=0.3
+langchain-anthropic>=0.3
+
+# LangGraph — StateGraph orchestration for the multi-node agent workflow.
+langgraph>=0.2
+
+# Testing
+pytest>=8.0
