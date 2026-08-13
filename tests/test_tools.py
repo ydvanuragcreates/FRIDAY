@@ -1,9 +1,13 @@
 import pytest
 
 from app.core.config import get_settings
+from app.tools.create_file import create_file
 from app.tools.list_files import list_files
 from app.tools.read_file import read_file
+from app.tools.run_command import run_command
+from app.tools.run_tests import run_tests
 from app.tools.search_code import search_code
+from app.tools.write_file import write_file
 
 
 @pytest.fixture
@@ -72,3 +76,72 @@ def test_search_code_respects_file_pattern(workspace) -> None:
 def test_search_code_no_matches(workspace) -> None:
     result = search_code.invoke({"query": "nonexistent_symbol_xyz"})
     assert result.startswith("No matches")
+
+
+def test_create_file_writes_new_file(workspace) -> None:
+    result = create_file.invoke({"file_path": "new_module.py", "content": "x = 1\n"})
+    assert result.startswith("Created")
+    assert (workspace / "new_module.py").read_text() == "x = 1\n"
+
+
+def test_create_file_rejects_existing_file(workspace) -> None:
+    result = create_file.invoke({"file_path": "app/auth.py", "content": "x = 1\n"})
+    assert result.startswith("Error")
+    assert "already exists" in result
+
+
+def test_create_file_rejects_traversal(workspace) -> None:
+    result = create_file.invoke({"file_path": "../escape.py", "content": "x = 1\n"})
+    assert result.startswith("Error")
+
+
+def test_create_file_creates_parent_directories(workspace) -> None:
+    result = create_file.invoke({"file_path": "pkg/sub/new.py", "content": "x = 1\n"})
+    assert result.startswith("Created")
+    assert (workspace / "pkg" / "sub" / "new.py").read_text() == "x = 1\n"
+
+
+def test_write_file_overwrites_existing_file(workspace) -> None:
+    result = write_file.invoke({"file_path": "app/auth.py", "content": "def login():\n    return True\n"})
+    assert result.startswith("Wrote")
+    assert "return True" in (workspace / "app" / "auth.py").read_text()
+
+
+def test_write_file_creates_new_file(workspace) -> None:
+    result = write_file.invoke({"file_path": "new.py", "content": "y = 2\n"})
+    assert result.startswith("Wrote")
+    assert (workspace / "new.py").read_text() == "y = 2\n"
+
+
+def test_write_file_rejects_traversal(workspace) -> None:
+    result = write_file.invoke({"file_path": "../escape.py", "content": "x = 1\n"})
+    assert result.startswith("Error")
+
+
+def test_write_file_rejects_directory_target(workspace) -> None:
+    result = write_file.invoke({"file_path": "app", "content": "x = 1\n"})
+    assert result.startswith("Error")
+
+
+def test_run_command_executes_allowed_command(workspace) -> None:
+    result = run_command.invoke({"command": "python --version"})
+    assert result.startswith("Exit code: 0")
+
+
+def test_run_command_rejects_disallowed_command(workspace) -> None:
+    result = run_command.invoke({"command": "curl https://example.com"})
+    assert result.startswith("Error")
+
+
+def test_run_command_rejects_denied_executable(workspace) -> None:
+    result = run_command.invoke({"command": "rm -rf ."})
+    assert result.startswith("Error")
+    assert "never allowed" in result
+
+
+def test_run_tests_runs_configured_test_command(workspace, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("TEST_COMMAND", "python --version")
+    get_settings.cache_clear()
+    result = run_tests.invoke({})
+    get_settings.cache_clear()
+    assert result.startswith("Exit code: 0")

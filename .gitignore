@@ -26,6 +26,10 @@ dist/
 .coverage
 htmlcov/
 
+# Embedded local Qdrant storage (codebase RAG index) — regenerate via
+# POST /api/projects/{project_id}/index, don't commit it.
+.qdrant_data/
+
 # IDE / OS
 .vscode/
 .idea/

@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+/*
+ * Single dark theme — this is a developer tool, not a marketing site, so
+ * there's no light-mode toggle to build. Tokens are defined once here so
+ * every component reaches for `bg-panel`/`text-muted`/`border-border`
+ * instead of ad-hoc hex values — one place to retune the palette.
+ */
+@theme {
+  --color-bg: #09090b;
+  --color-panel: #111113;
+  --color-panel-alt: #17171a;
+  --color-border: #27272a;
+  --color-border-subtle: #1c1c1f;
+  --color-text: #e4e4e7;
+  --color-muted: #93939c;
+  --color-faint: #5c5c64;
+  --color-accent: #6366f1;
+  --color-accent-hover: #818cf8;
+  --color-success: #22c55e;
+  --color-warning: #eab308;
+  --color-danger: #ef4444;
+  --color-info: #3b82f6;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+}
+
+/* Thin, dark-theme-appropriate scrollbars — the default light scrollbar
+   thumb reads as a bug on this background. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
